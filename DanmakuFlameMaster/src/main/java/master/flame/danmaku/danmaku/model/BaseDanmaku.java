@@ -169,6 +169,12 @@ public abstract class BaseDanmaku {
     public IDrawingCache<?> cache;
 
     /**
+     * 是否缓存绘制，gif关闭此选项
+     */
+
+    public boolean isCache = false;
+
+    /**
      * 是否是直播弹幕
      */
     public boolean isLive;

@@ -237,7 +237,9 @@ public class CacheManagingDrawTask extends DrawTask {
                     }
                     return;
                 }
-                mHandler.obtainMessage(CacheHandler.ADD_DANMAKU, danmaku).sendToTarget();
+                if(danmaku.isCache) {
+                    mHandler.obtainMessage(CacheHandler.ADD_DANMAKU, danmaku).sendToTarget();
+                }
             }
         }
 

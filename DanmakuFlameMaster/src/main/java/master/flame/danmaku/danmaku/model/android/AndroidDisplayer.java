@@ -435,7 +435,7 @@ public class AndroidDisplayer extends AbsDisplayer<Canvas, Typeface> {
             }
 
             // drawing cache
-            boolean cacheDrawn = sStuffer.drawCache(danmaku, canvas, left, top, alphaPaint, mDisplayConfig.PAINT);
+            boolean cacheDrawn = danmaku.isCache && sStuffer.drawCache(danmaku, canvas, left, top, alphaPaint, mDisplayConfig.PAINT);
             int result = IRenderer.CACHE_RENDERING;
             if (!cacheDrawn) {
                 if (alphaPaint != null) {
