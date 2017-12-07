@@ -12,6 +12,10 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
+
+import master.flame.danmaku.danmaku.model.Duration;
+import master.flame.danmaku.danmaku.model.R2LDanmaku;
+import master.flame.danmaku.danmaku.model.android.DanmakuFactory;
 import master.flame.danmaku.danmaku.util.SystemClock;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -22,6 +26,7 @@ import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -80,52 +85,58 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
 
     private Button mBtnSendDanmakus;
     private DanmakuContext mContext;
+
+    private VDDanmakuView mVDDanmakuView;
+
     private BaseCacheStuffer.Proxy mCacheStufferAdapter = new BaseCacheStuffer.Proxy() {
 
         private Drawable mDrawable;
 
         @Override
         public void prepareDrawing(final BaseDanmaku danmaku, boolean fromWorkerThread) {
-            if (danmaku.text instanceof Spanned) { // 根据你的条件检查是否需要需要更新弹幕
-                // FIXME 这里只是简单启个线程来加载远程url图片，请使用你自己的异步线程池，最好加上你的缓存池
-                new Thread() {
-
-                    @Override
-                    public void run() {
-                        String url = "http://www.bilibili.com/favicon.ico";
-                        InputStream inputStream = null;
-                        Drawable drawable = mDrawable;
-                        if(drawable == null) {
-                            try {
-                                URLConnection urlConnection = new URL(url).openConnection();
-                                inputStream = urlConnection.getInputStream();
-                                drawable = BitmapDrawable.createFromStream(inputStream, "bitmap");
-                                mDrawable = drawable;
-                            } catch (MalformedURLException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } finally {
-                                IOUtils.closeQuietly(inputStream);
-                            }
-                        }
-                        if (drawable != null) {
-                            drawable.setBounds(0, 0, 100, 100);
-                            SpannableStringBuilder spannable = createSpannable(drawable);
-                            danmaku.text = spannable;
-                            if(mDanmakuView != null) {
-                                mDanmakuView.invalidateDanmaku(danmaku, false);
-                            }
-                            return;
-                        }
-                    }
-                }.start();
-            }
+//            if (danmaku.text instanceof Spanned) { // 根据你的条件检查是否需要需要更新弹幕
+//                // FIXME 这里只是简单启个线程来加载远程url图片，请使用你自己的异步线程池，最好加上你的缓存池
+//                new Thread() {
+//
+//                    @Override
+//                    public void run() {
+//                        String url = "http://www.bilibili.com/favicon.ico";
+//                        InputStream inputStream = null;
+//                        Drawable drawable = mDrawable;
+//                        if(drawable == null) {
+//                            try {
+//                                URLConnection urlConnection = new URL(url).openConnection();
+//                                inputStream = urlConnection.getInputStream();
+//                                drawable = BitmapDrawable.createFromStream(inputStream, "bitmap");
+//                                mDrawable = drawable;
+//                            } catch (MalformedURLException e) {
+//                                e.printStackTrace();
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            } finally {
+//                                IOUtils.closeQuietly(inputStream);
+//                            }
+//                        }
+//                        if (drawable != null) {
+//                            drawable.setBounds(0, 0, 100, 100);
+//                            SpannableStringBuilder spannable = createSpannable(drawable);
+//                            danmaku.text = spannable;
+//                            if(mDanmakuView != null) {
+//                                mDanmakuView.invalidateDanmaku(danmaku, false);
+//                            }
+//                            return;
+//                        }
+//                    }
+//                }.start();
+//            }
+            mVDDanmakuView.prepared(danmaku);
         }
 
         @Override
         public void releaseResource(BaseDanmaku danmaku) {
             // TODO 重要:清理含有ImageSpan的text中的一些占用内存的资源 例如drawable
+
+            mVDDanmakuView.remove(danmaku);
         }
     };
 
@@ -157,17 +168,8 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_biubiu);
         findViews();
-
-//        GifDrawable drawable = null;
-//        try{
-//            drawable = new GifDrawable(getResources(),R.raw.timg);
-//            ImageView imageView = (ImageView)findViewById(R.id.test_gif);
-//            imageView.setImageDrawable(drawable);
-//        }catch (IOException e){
-//            e.printStackTrace();
-//        }
     }
 
     private BaseDanmakuParser createParser(InputStream stream) {
@@ -207,6 +209,7 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         mBtnSendDanmaku = (Button) findViewById(R.id.btn_send);
         mBtnSendDanmakuTextAndImage = (Button) findViewById(R.id.btn_send_image_text);
         mBtnSendDanmakus = (Button) findViewById(R.id.btn_send_danmakus);
+        mVDDanmakuView = (VDDanmakuView) findViewById(R.id.vd_danmaku);
         mBtnRotate.setOnClickListener(this);
         mBtnHideDanmaku.setOnClickListener(this);
         mMediaController.setOnClickListener(this);
@@ -306,6 +309,10 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         if (mDanmakuView != null && mDanmakuView.isPrepared()) {
             mDanmakuView.pause();
         }
+
+        if(mVDDanmakuView != null){
+            mVDDanmakuView.onPause();
+        }
     }
 
     @Override
@@ -313,6 +320,9 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         super.onResume();
         if (mDanmakuView != null && mDanmakuView.isPrepared() && mDanmakuView.isPaused()) {
             mDanmakuView.resume();
+        }
+        if(mVDDanmakuView != null){
+            mVDDanmakuView.onResume();
         }
     }
 
@@ -400,7 +410,7 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         }
         // for(int i=0;i<100;i++){
         // }
-        danmaku.text = "这是一条弹幕" + System.nanoTime();
+        danmaku.text = "这是一条弹幕视频";
         danmaku.padding = 5;
         danmaku.priority = 0;  // 可能会被各种过滤器过滤并隐藏显示
         danmaku.isLive = islive;
@@ -410,8 +420,9 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         danmaku.textShadowColor = Color.WHITE;
         // danmaku.underlineColor = Color.GREEN;
         danmaku.borderColor = Color.GREEN;
+        danmaku.isCache = false;
         mDanmakuView.addDanmaku(danmaku);
-
+        mVDDanmakuView.addDanmaku(danmaku, "/sdcard/test/1.mp4");
     }
 
     private void addDanmaKuShowTextAndImage(boolean islive) {
@@ -447,7 +458,7 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
         ImageSpan span = new ImageSpan(drawable);//ImageSpan.ALIGN_BOTTOM);
         spannableStringBuilder.setSpan(span, 0, text.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-        spannableStringBuilder.append("图文混排");
+        spannableStringBuilder.append("gif弹幕");
         spannableStringBuilder.setSpan(new BackgroundColorSpan(Color.parseColor("#8A2233B1")), 0, spannableStringBuilder.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         return spannableStringBuilder;
     }
