@@ -66,13 +66,13 @@ public class VDDanmakuView extends FrameLayout {
         }
     }
 
-    public void onPause(){
+    public void pause(){
         for (Map.Entry<BaseDanmaku, VDDanmakuBox> entry : mUsingMap.entrySet()) {
             entry.getValue().getVideoView().pause();
         }
     }
 
-    public void onResume(){
+    public void resume(){
         for (Map.Entry<BaseDanmaku, VDDanmakuBox> entry : mUsingMap.entrySet()) {
             entry.getValue().getVideoView().start();
         }
@@ -110,7 +110,9 @@ public class VDDanmakuView extends FrameLayout {
         if(sinaVideoView == null)
             return null;
         addView((View)sinaVideoView, Width, Height);
+        ((View) sinaVideoView).setX(-Width);
         ((View) sinaVideoView).setVisibility(INVISIBLE);
+        sinaVideoView.setMute(true);
         return new VDDanmakuBox(sinaVideoView);
     }
 }

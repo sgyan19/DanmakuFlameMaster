@@ -31,6 +31,8 @@ public class VDDanmakuBox {
 
     private SpaceDrawable mDrawable;
 
+    private boolean mFirstDraw;
+
     public VDDanmakuBox(ISplayerVideoView view){
         mVideoView = view;
     }
@@ -57,6 +59,7 @@ public class VDDanmakuBox {
         spannableStringBuilder.append(danmaku.text);
         danmaku.text = spannableStringBuilder;
         mPlayPath = path;
+        mFirstDraw = true;
     }
 
     public void noUse(){
@@ -64,6 +67,7 @@ public class VDDanmakuBox {
         mVideoView.stopPlayback();
         ((View)mVideoView).setVisibility(View.INVISIBLE);
         mDrawable = null;
+        mFirstDraw = false;
     }
 
     public ISplayerVideoView getVideoView(){
@@ -96,8 +100,9 @@ public class VDDanmakuBox {
         if(mVideoView != null && baseDanmaku != null){
             ((View)mVideoView).setX(baseDanmaku.getLeft() + 1);
             ((View)mVideoView).setY(baseDanmaku.getTop() + 1);
-            if(!mVideoView.isPlaying()){
+            if(mFirstDraw) {
                 mVideoView.start();
+                mFirstDraw = false;
             }
         }
     }

@@ -7,28 +7,20 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Environment;
 
-import master.flame.danmaku.danmaku.model.Duration;
-import master.flame.danmaku.danmaku.model.R2LDanmaku;
-import master.flame.danmaku.danmaku.model.android.DanmakuFactory;
 import master.flame.danmaku.danmaku.util.SystemClock;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.VideoView;
 
@@ -36,9 +28,6 @@ import com.sina.GifDrawable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -57,7 +46,6 @@ import master.flame.danmaku.danmaku.model.android.Danmakus;
 import master.flame.danmaku.danmaku.model.android.SpannedCacheStuffer;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 import master.flame.danmaku.danmaku.parser.IDataSource;
-import master.flame.danmaku.danmaku.util.IOUtils;
 
 public class BiuBiuActivity extends Activity implements View.OnClickListener {
 
@@ -311,7 +299,7 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         }
 
         if(mVDDanmakuView != null){
-            mVDDanmakuView.onPause();
+            mVDDanmakuView.pause();
         }
     }
 
@@ -322,7 +310,7 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
             mDanmakuView.resume();
         }
         if(mVDDanmakuView != null){
-            mVDDanmakuView.onResume();
+            mVDDanmakuView.resume();
         }
     }
 
@@ -369,8 +357,10 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
             // mDanmakuView.showAndResumeDrawTask(mPausedPosition); // sync to the video time in your practice
         } else if (v == mBtnPauseDanmaku) {
             mDanmakuView.pause();
+            mVDDanmakuView.pause();
         } else if (v == mBtnResumeDanmaku) {
             mDanmakuView.resume();
+            mVDDanmakuView.resume();
         } else if (v == mBtnSendDanmaku) {
             addDanmaku(false);
         } else if (v == mBtnSendDanmakuTextAndImage) {
@@ -410,7 +400,7 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         }
         // for(int i=0;i<100;i++){
         // }
-        danmaku.text = "这是一条弹幕视频";
+        danmaku.text = "这是一条视频弹幕";
         danmaku.padding = 5;
         danmaku.priority = 0;  // 可能会被各种过滤器过滤并隐藏显示
         danmaku.isLive = islive;
@@ -458,7 +448,7 @@ public class BiuBiuActivity extends Activity implements View.OnClickListener {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
         ImageSpan span = new ImageSpan(drawable);//ImageSpan.ALIGN_BOTTOM);
         spannableStringBuilder.setSpan(span, 0, text.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-        spannableStringBuilder.append("gif弹幕");
+        spannableStringBuilder.append("这是一条gif弹幕");
         spannableStringBuilder.setSpan(new BackgroundColorSpan(Color.parseColor("#8A2233B1")), 0, spannableStringBuilder.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         return spannableStringBuilder;
     }

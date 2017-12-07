@@ -57,14 +57,14 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/send_danmaku" />
+            android:text="发送一条视频弹幕" />
 
         <Button
             android:id="@+id/btn_send_image_text"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/send_danmaku_image_text" />
+            android:text="发送一条GIF弹幕" />
         
         <Button
             android:id="@+id/btn_send_danmakus"
